@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lista de Tarefas</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0077ff" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #e9ecf1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
+    }
+    h1 { text-align: center; margin-bottom: 20px; color: #2e2e2e; font-weight: 600; }
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      outline: none;
+    }
+    button.add-btn {
+      background-color: #0077ff;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    ul { list-style: none; }
+    li {
+      background: #f8f9fb;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    li.done {
+      text-decoration: line-through;
+      color: #999;
+      background-color: #e6f4e6;
+    }
+    .actions button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      margin-left: 10px;
+    }
+    .check-btn { color: #2ecc71; }
+    .delete-btn { color: #e74c3c; }
+    @media (max-width: 480px) {
+      .container { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 Minha Lista</h1>
+    <div class="input-group">
+      <input id="taskInput" type="text" placeholder="Digite uma tarefa..." />
+      <button class="add-btn" onclick="addTask()">Adicionar</button>
+    </div>
+    <ul id="taskList"></ul>
+  </div>
+  <script>
+    const taskListElement = document.getElementById('taskList');
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    function renderTasks() {
+      taskListElement.innerHTML = '';
+      tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        li.className = task.done ? 'done' : '';
+        li.innerHTML = \`
+          <span>\${task.text}</span>
+          <div class="actions">
+            <button class="check-btn" onclick="toggleDone(\${index})">✔</button>
+            <button class="delete-btn" onclick="removeTask(\${index})">✖</button>
+          </div>\`;
+        taskListElement.appendChild(li);
+      });
+    }
+
+    function addTask() {
+      const input = document.getElementById('taskInput');
+      const text = input.value.trim();
+      if (text === '') return;
+      tasks.push({ text, done: false });
+      saveTasks();
+      input.value = '';
+    }
+
+    function toggleDone(index) {
+      tasks[index].done = !tasks[index].done;
+      saveTasks();
+    }
+
+    function removeTask(index) {
+      tasks.splice(index, 1);
+      saveTasks();
+    }
+
+    function saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      renderTasks();
+    }
+
+    renderTasks();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('✔ Service Worker registrado'))
+        .catch(err => console.log('Erro ao registrar Service Worker:', err));
+    }
+  </script>
+</body>
+</html>
